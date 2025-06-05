@@ -5,7 +5,6 @@ import com.example.ratelimiter.limiter.RateLimitResult;
 import com.example.ratelimiter.limiter.TokenBucketRateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;

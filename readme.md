@@ -19,9 +19,11 @@ docker compose up -d         # Start Redis
 ```
 
 ## Request Example
+
 ```bash
 curl -H "X-User-Id: user123" -X POST http://localhost:8080/api/request
 ```
+
 ## Project Structure
 
 - `src/` – Application source code

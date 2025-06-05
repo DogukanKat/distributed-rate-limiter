@@ -1,3 +1,4 @@
 package com.example.ratelimiter.limiter;
 
-public record RateLimitResult(boolean allowed, long tokensLeft) {}
+public record RateLimitResult(boolean allowed, long tokensLeft) {
+}

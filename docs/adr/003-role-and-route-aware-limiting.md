@@ -6,7 +6,8 @@ Accepted
 
 ## Context
 
-The current system applies the same token bucket rate limit to every user and every endpoint. In a production environment, we need:
+The current system applies the same token bucket rate limit to every user and every endpoint. In a production
+environment, we need:
 
 * Different rate limits for different user roles (e.g., “basic”, “premium”, “admin”).
 * The ability to configure per-endpoint (route) overrides.
@@ -14,10 +15,13 @@ The current system applies the same token bucket rate limit to every user and ev
 
 ## Decision
 
-1. Introduce a `RateLimiterProperties` class annotated with `@ConfigurationProperties(prefix = "rate-limiter")` to bind configuration from `application.yml`. It will contain two maps:
+1. Introduce a `RateLimiterProperties` class annotated with `@ConfigurationProperties(prefix = "rate-limiter")` to bind
+   configuration from `application.yml`. It will contain two maps:
 
-   * `roles`: maps each role name (e.g., “basic”, “premium”, “admin”) to a `RateLimitConfig` object containing `maxTokens` and `refillIntervalMs`.
-   * `routes`: maps each endpoint path (e.g., `/api/request`, `/api/checkout`) to another map that associates role names with their own `RateLimitConfig`.
+    * `roles`: maps each role name (e.g., “basic”, “premium”, “admin”) to a `RateLimitConfig` object containing
+      `maxTokens` and `refillIntervalMs`.
+    * `routes`: maps each endpoint path (e.g., `/api/request`, `/api/checkout`) to another map that associates role
+      names with their own `RateLimitConfig`.
 
 2. Create a `RateLimitConfig` DTO with two fields:
 
@@ -28,15 +32,19 @@ The current system applies the same token bucket rate limit to every user and ev
    }
    ```
 
-3. Implement a `RateLimitPolicyResolver` component that takes `(role, route)` as input and returns the appropriate `RateLimitConfig`. It will:
+3. Implement a `RateLimitPolicyResolver` component that takes `(role, route)` as input and returns the appropriate
+   `RateLimitConfig`. It will:
 
-   * First check for a route-specific override in `routes[route][role]`.
-   * If none exists, fall back to `roles[role]`.
-   * If the role is not found, fall back to the “basic” role’s default configuration.
+    * First check for a route-specific override in `routes[route][role]`.
+    * If none exists, fall back to `roles[role]`.
+    * If the role is not found, fall back to the “basic” role’s default configuration.
 
-4. Update `TokenBucketRateLimiter.consume(...)` to accept `(userId, role, route)` parameters. Inside `consume`, call `policyResolver.resolve(role, route)` to obtain `maxTokens` and `refillIntervalMs`, then pass those values to the existing Lua-based token bucket logic.
+4. Update `TokenBucketRateLimiter.consume(...)` to accept `(userId, role, route)` parameters. Inside `consume`, call
+   `policyResolver.resolve(role, route)` to obtain `maxTokens` and `refillIntervalMs`, then pass those values to the
+   existing Lua-based token bucket logic.
 
-5. In `application.yml`, configure defaults under `rate-limiter.roles` and any per-route overrides under `rate-limiter.routes`. For example:
+5. In `application.yml`, configure defaults under `rate-limiter.roles` and any per-route overrides under
+   `rate-limiter.routes`. For example:
 
    ```yaml
    rate-limiter:
