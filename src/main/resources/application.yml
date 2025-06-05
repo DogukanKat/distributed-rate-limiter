@@ -6,3 +6,31 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+rate-limiter:
+  roles:
+    basic:
+      max-tokens: 10
+      refill-interval-ms: 60000
+    premium:
+      max-tokens: 50
+      refill-interval-ms: 60000
+    admin:
+      max-tokens: 1000
+      refill-interval-ms: 60000
+
+  routes:
+    /api/request:
+      basic:
+        max-tokens: 10
+        refill-interval-ms: 60000
+      premium:
+        max-tokens: 50
+        refill-interval-ms: 60000
+    /api/checkout:
+      basic:
+        max-tokens: 5
+        refill-interval-ms: 60000
+      premium:
+        max-tokens: 30
+        refill-interval-ms: 60000
