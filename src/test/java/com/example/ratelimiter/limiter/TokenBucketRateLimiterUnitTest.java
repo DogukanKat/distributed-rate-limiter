@@ -37,17 +37,14 @@ class TokenBucketRateLimiterUnitTest {
         String role = "basic";
         String route = "/api/test";
 
-        // PolicyResolver’dan gelen config
         RateLimitConfig config = new RateLimitConfig();
         config.setMaxTokens(5);
         config.setRefillIntervalMs(60000);
         when(policyResolver.resolve(role, route)).thenReturn(config);
 
-        // Redis script’in döneceği listeyi taklit et
-        // [1, 4] → allowed=1, kalan token=4
         List<Long> scriptResult = Arrays.asList(1L, 4L);
         when(redisTemplate.execute(eq(tokenBucketScript),
-                anyList(), // key list
+                anyList(),
                 any(String[].class)))
                 .thenReturn(scriptResult);
 
@@ -56,7 +53,6 @@ class TokenBucketRateLimiterUnitTest {
         assertTrue(result.allowed());
         assertEquals(4, result.tokensLeft());
 
-        // Script’in doğru KEYS ve ARGV ile çağrıldığını onayla
         verify(redisTemplate, times(1))
                 .execute(eq(tokenBucketScript),
                         anyList(),
@@ -74,7 +70,6 @@ class TokenBucketRateLimiterUnitTest {
         config.setRefillIntervalMs(60000);
         when(policyResolver.resolve(role, route)).thenReturn(config);
 
-        // Script’in döneceği liste: [0, 0] → allowed=0
         List<Long> scriptResult = Arrays.asList(0L, 0L);
         when(redisTemplate.execute(eq(tokenBucketScript),
                 anyList(),
@@ -98,7 +93,6 @@ class TokenBucketRateLimiterUnitTest {
         config.setRefillIntervalMs(60000);
         when(policyResolver.resolve(role, route)).thenReturn(config);
 
-        // Script null dönerse
         when(redisTemplate.execute(eq(tokenBucketScript),
                 anyList(),
                 any(String[].class)))

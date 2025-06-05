@@ -64,14 +64,12 @@ class TokenBucketRateLimiterIntegrationTest {
 
     @Test
     void whenRefillAfterInterval_thenAllowedAgain() throws InterruptedException {
-        // token’ları tüket
         for (int i = 0; i < 10; i++) {
             rateLimiter.consume("userA", "basic", "/api/test");
         }
         RateLimitResult blocked = rateLimiter.consume("userA", "basic", "/api/test");
         assertFalse(blocked.allowed());
 
-        // 60 saniyelik refill bekle (REFILL_INTERVAL_MS = 60000)
         Thread.sleep(60000 + 100);
         RateLimitResult afterRefill = rateLimiter.consume("userA", "basic", "/api/test");
         assertTrue(afterRefill.allowed());

@@ -14,22 +14,14 @@ import org.testcontainers.utility.DockerImageName;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Entegrasyon testi:
- *  - Resmi Testcontainers GenericContainer ile Redis ayağa kaldırılıyor
- *  - Spring Boot context’i başlatılıyor
- *  - MockMvc ile controller’a HTTP istekleri yollanıyor
- */
 @Testcontainers
 @SpringBootTest(properties = {
-        // Testcontainers’ın ayağa kaldırdığı Redis host/port bilgisi
         "spring.redis.host=${testcontainers.redis.host}",
         "spring.redis.port=${testcontainers.redis.port}"
 })
 @AutoConfigureMockMvc
 class DemoControllerIntegrationTest {
 
-    // GenericContainer kullanarak resmi Redis imajını ayağa kaldırıyoruz
     @Container
     static GenericContainer<?> redisContainer =
             new GenericContainer<>(DockerImageName.parse("redis:7"))
@@ -43,7 +35,6 @@ class DemoControllerIntegrationTest {
 
     @BeforeAll
     static void setUpAll() {
-        // Oluşturulan konteynerin host ve port bilgisini Spring'e aktarıyoruz
         System.setProperty("testcontainers.redis.host", redisContainer.getHost());
         System.setProperty("testcontainers.redis.port",
                 redisContainer.getMappedPort(6379).toString());
@@ -51,7 +42,6 @@ class DemoControllerIntegrationTest {
 
     @BeforeEach
     void cleanRedis() {
-        // Her test öncesi Redis’i temizliyoruz
         redisTemplate.getConnectionFactory().getConnection().flushAll();
     }
 
@@ -68,7 +58,6 @@ class DemoControllerIntegrationTest {
 
     @Test
     void whenRequestOverLimit_thenReturns429() throws Exception {
-        // “basic” rolü için maxTokens=10 olduğundan 11. istek 429 dönecek
         for (int i = 1; i <= 10; i++) {
             mockMvc.perform(post("/api/request")
                             .header("X-User-Id", "intUser")
@@ -101,7 +90,6 @@ class DemoControllerIntegrationTest {
 
     @Test
     void whenCheckoutOverLimit_thenReturns429() throws Exception {
-        // “premium” rolü ve /api/checkout için maxTokens=30 olduğundan 31. istek 429 dönecek
         for (int i = 1; i <= 50; i++) {
             mockMvc.perform(post("/api/checkout")
                             .header("X-User-Id", "intUser")

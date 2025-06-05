@@ -16,27 +16,18 @@ public class TokenBucketRateLimiter {
     private final DefaultRedisScript<List> tokenBucketScript;
     private final RateLimitPolicyResolver policyResolver;
 
-    /**
-     * @param userId Benzersiz kullanıcı/istemci kimliği
-     * @param role   Kullanıcı rolü (basic, premium, admin)
-     * @param route  İstek yapılan URI (örneğin: "/api/request")
-     * @return RateLimitResult → {allowed, tokensLeft}
-     */
     public RateLimitResult consume(String userId, String role, String route) {
-        // Önce policyResolver’dan ilgili konfigürasyonu al
+
         RateLimitConfig config = policyResolver.resolve(role, route);
         long maxTokens = config.getMaxTokens();
         long refillInterval = config.getRefillIntervalMs();
 
-        // Redis anahtarlarını oluştur
         String tokenKey = "rate:bucket:" + userId + ":" + route;
         String lastRefillKey = tokenKey + ":lastRefill";
         long now = System.currentTimeMillis();
 
-        // Lua script’e verilecek KEYS listesi
         List<String> keys = Arrays.asList(tokenKey, lastRefillKey);
 
-        // Lua script’e verilecek ARGV listesi: now, refillInterval, maxTokens, refillAmount (maxTokens kullanıyoruz)
         List<String> args = Arrays.asList(
                 String.valueOf(now),
                 String.valueOf(refillInterval),
@@ -44,7 +35,6 @@ public class TokenBucketRateLimiter {
                 String.valueOf(maxTokens)
         );
 
-        // Lua script’i çalıştır; ham List dönecek
         @SuppressWarnings("unchecked")
         List<Long> result = (List<Long>) redis.execute(tokenBucketScript, keys, args.toArray(new String[0]));
 
