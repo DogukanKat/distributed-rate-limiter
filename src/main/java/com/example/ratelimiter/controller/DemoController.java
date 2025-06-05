@@ -3,6 +3,7 @@ package com.example.ratelimiter.controller;
 import com.example.ratelimiter.limiter.RateLimitResult;
 import com.example.ratelimiter.limiter.TokenBucketRateLimiter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +19,14 @@ public class DemoController {
         RateLimitResult result = rateLimiter.consume(userId);
 
         if (!result.allowed()) {
-            return ResponseEntity.status(429).body("Too Many Requests");
+            return ResponseEntity
+                    .status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header("X-RateLimit-Remaining", "0")
+                    .body("Too Many Requests");
         }
 
-        return ResponseEntity.ok("Allowed! Tokens left: " + result.tokensLeft());
+        return ResponseEntity.ok()
+                .header("X-RateLimit-Remaining", String.valueOf(result.tokensLeft()))
+                .body("Allowed! Tokens left: " + result.tokensLeft());
     }
 }
