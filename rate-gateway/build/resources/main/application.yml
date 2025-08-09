@@ -6,6 +6,10 @@ spring:
     name: rate-gateway
   main:
     banner-mode: "off"
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 management:
   endpoints:
@@ -21,3 +25,5 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
+
+

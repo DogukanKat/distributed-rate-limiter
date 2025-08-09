@@ -1,0 +1,54 @@
+services:
+  redis:
+    image: redis:7
+    container_name: rl-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.8
+    container_name: rl-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092,OUTSIDE://localhost:19092
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+      - "9644:9644"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "rpk cluster info --brokers=redpanda:9092 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rl-gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication"
+    ports:
+      - "8080:8080"
