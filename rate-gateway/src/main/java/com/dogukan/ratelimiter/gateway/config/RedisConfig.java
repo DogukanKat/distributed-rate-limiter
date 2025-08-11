@@ -22,7 +22,7 @@ public class RedisConfig {
   public DefaultRedisScript<List> tokenBucketScript() {
     DefaultRedisScript<List> script = new DefaultRedisScript<>();
     script.setLocation(new ClassPathResource("redis/token_bucket.lua"));
-    script.setResultType(List.class); // <— tablo döner
+    script.setResultType(List.class);
     return script;
   }
 }

@@ -29,7 +29,6 @@ public class RateLimiterFilter implements WebFilter {
   private final Counter denyCounter;
   private final Timer decisionTimer;
 
-  // remaining/capacity <= 10% ise NEAR_LIMIT audit gönder
   private final double nearLimitRatio = 0.10;
 
   public RateLimiterFilter(
@@ -64,18 +63,16 @@ public class RateLimiterFilter implements WebFilter {
     String method = req.getMethod() != null ? req.getMethod().name() : "GET";
     String path = req.getPath().value();
 
-    // Dinamik planı çöz
     LimitPlan plan = config.resolve(tenant, path, method);
 
     var ctx = new RateContext(
       tenant, path, method, identity,
-      1,                       // cost
+      1,
       plan.capacity(),
       plan.refillPerSec(),
       plan.ttlSeconds()
     );
 
-    // Lambda içinde "effectively final" kullanmak için sabitle
     final String fTenant = tenant;
     final String fPath = path;
     final String fMethod = method;
@@ -94,7 +91,6 @@ public class RateLimiterFilter implements WebFilter {
           exchange.getResponse().getHeaders()
             .add("X-RateLimit-Remaining", String.valueOf(d.remaining()));
 
-          // Near-limit eşiği
           if (fCapacity > 0 && (double) d.remaining() / (double) fCapacity <= nearLimitRatio) {
             audit.publish(AuditEvent.nearLimit(
               fTenant, fPath, fMethod, fIdentity,

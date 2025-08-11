@@ -59,7 +59,6 @@ public class RedisConfigProvider implements ConfigProvider {
     if (rules == null) {
       rules = loadRulesForTenant(tenant);
       if (rules == null) {
-        // Redis erişilemez veya boş → fallback
         return fallback.resolve(tenant, path, method);
       }
       tenantRulesCache.put(cacheKey, rules);

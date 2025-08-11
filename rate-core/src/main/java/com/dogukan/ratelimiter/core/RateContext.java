@@ -6,11 +6,11 @@ public record RateContext(
   String tenantId,
   String routeId,
   String method,
-  String identity,   // userId/ip hash gibi
-  int cost,          // default 1
-  long capacity,     // bucket capacity / burst
-  long refillPerSec, // tokens per sec
-  long ttlSeconds    // redis key ttl
+  String identity,
+  int cost,
+  long capacity,
+  long refillPerSec,
+  long ttlSeconds
 ) {
   public RateContext {
     Objects.requireNonNull(tenantId, "tenantId");

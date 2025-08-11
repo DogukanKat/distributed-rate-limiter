@@ -37,7 +37,6 @@ public class RedisRateLimiterService implements RateLimiterService {
       String.valueOf(ctx.ttlSeconds())
     };
 
-    // Object[] yerine List<?> veriyoruz
     return redis.execute(tokenBucketScript, keys, Arrays.asList(argv))
       .next()
       .map(res -> {

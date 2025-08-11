@@ -1,7 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-  // Kökte plugin versiyonu tanımlamıyoruz; alt modüller kendi versiyonlarını verecek.
   java
 }
 

@@ -5,7 +5,7 @@ public record AuditEvent(
   String route,
   String method,
   String identity,
-  String type,          // ALLOW | DENY | NEAR_LIMIT
+  String type,
   long remaining,
   long capacity,
   long refillPerSec,

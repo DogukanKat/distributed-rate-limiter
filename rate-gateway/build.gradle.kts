@@ -8,6 +8,8 @@ dependencies {
   implementation(project(":rate-common"))
   implementation(project(":rate-core"))
   implementation(project(":rate-config"))
+  implementation(project(":rate-admin"))
+  implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
 
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-actuator")

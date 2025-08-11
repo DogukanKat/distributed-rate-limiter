@@ -107,8 +107,8 @@ import { check, sleep } from 'k6';
 
 export let options = {
 stages: [
-{ duration: '10s', target: 50 }, // burst
-{ duration: '1m', target: 50 },  // steady
+{ duration: '10s', target: 50 },
+{ duration: '1m', target: 50 },
 ],
 };
 
