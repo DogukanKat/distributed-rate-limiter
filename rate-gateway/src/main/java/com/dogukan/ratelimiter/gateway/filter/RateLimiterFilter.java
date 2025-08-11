@@ -1,5 +1,7 @@
 package com.dogukan.ratelimiter.gateway.filter;
 
+import com.dogukan.ratelimiter.config.ConfigProvider;
+import com.dogukan.ratelimiter.config.model.LimitPlan;
 import com.dogukan.ratelimiter.core.Decision;
 import com.dogukan.ratelimiter.core.RateContext;
 import com.dogukan.ratelimiter.core.RateLimiterService;
@@ -12,13 +14,15 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
-@Component // artık aktif
+@Component
 public class RateLimiterFilter implements WebFilter {
 
   private final RateLimiterService service;
+  private final ConfigProvider config;
 
-  public RateLimiterFilter(RateLimiterService service) {
+  public RateLimiterFilter(RateLimiterService service, ConfigProvider config) {
     this.service = service;
+    this.config = config;
   }
 
   @Override
@@ -34,33 +38,36 @@ public class RateLimiterFilter implements WebFilter {
       identity = req.getRemoteAddress() != null ? req.getRemoteAddress().getAddress().getHostAddress() : "anon";
     }
 
-    // getMethodValue() yerine:
     String method = req.getMethod() != null ? req.getMethod().name() : "GET";
+    String path = req.getPath().value();
+
+    // Dinamik planı çöz
+    LimitPlan plan = config.resolve(tenant, path, method);
 
     var ctx = new RateContext(
       tenant,
-      req.getPath().value(),
+      path,
       method,
       identity,
-      1,   // cost
-      10,  // capacity (eski 100 -> 10)
-      2,   // refill tokens/sec (eski 50 -> 2)
-      300  // ttl seconds (farketmez, küçük tutabiliriz)
+      1,                      // cost
+      plan.capacity(),
+      plan.refillPerSec(),
+      plan.ttlSeconds()
     );
 
     return service.check(ctx)
-      .flatMap(decision -> handleDecision(exchange, chain, decision))
-      .timeout(java.time.Duration.ofMillis(100))
+      .flatMap(d -> handle(exchange, chain, d))
+      .timeout(Duration.ofMillis(100))
       .onErrorResume(ex -> chain.filter(exchange)); // fail-open
   }
 
-  private Mono<Void> handleDecision(ServerWebExchange exchange, WebFilterChain chain, Decision d) {
+  private Mono<Void> handle(ServerWebExchange exchange, WebFilterChain chain, Decision d) {
     if (d.allowed()) {
       exchange.getResponse().getHeaders().add("X-RateLimit-Remaining", String.valueOf(d.remaining()));
       return chain.filter(exchange);
     }
     var res = exchange.getResponse();
-    res.setStatusCode(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS);
+    res.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
     res.getHeaders().add("Retry-After", String.valueOf(d.retryAfterSeconds()));
     return res.setComplete();
   }
