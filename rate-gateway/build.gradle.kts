@@ -13,6 +13,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
   implementation("org.springframework.kafka:spring-kafka")
+  implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
   // Observability (ileride kullanacağız)
   implementation("io.micrometer:micrometer-registry-prometheus")
