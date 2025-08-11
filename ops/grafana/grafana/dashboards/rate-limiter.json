@@ -1,0 +1,22 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    { "type": "stat", "title": "Allowed (total)", "id": 1, "datasource": "Prometheus",
+      "targets": [{ "expr": "rate_limit_allowed_total", "refId": "A" }] },
+    { "type": "stat", "title": "Blocked (total)", "id": 2, "datasource": "Prometheus",
+      "targets": [{ "expr": "rate_limit_blocked_total", "refId": "A" }] },
+    { "type": "timeseries", "title": "Decision Latency (ms)", "id": 3, "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "milliseconds" } },
+      "targets": [
+        { "expr": "rate(rate_limit_decision_duration_ms_seconds_sum[1m]) / rate(rate_limit_decision_duration_ms_seconds_count[1m]) * 1000",
+          "refId": "A" }
+      ] }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["rate-limiter"],
+  "title": "Rate Limiter",
+  "version": 1
+}

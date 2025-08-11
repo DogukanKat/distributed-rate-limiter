@@ -34,6 +34,33 @@ services:
       interval: 5s
       timeout: 3s
       retries: 30
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: rl-prometheus
+    volumes:
+      - ./ops/prometheus:/etc/prometheus:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      app:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:10.4.5
+    container_name: rl-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./ops/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./ops/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
 
   app:
     build:

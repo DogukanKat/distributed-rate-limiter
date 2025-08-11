@@ -6,6 +6,7 @@ import com.dogukan.ratelimiter.config.model.LimitPlan;
 import com.dogukan.ratelimiter.config.model.RouteLimit;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Component;

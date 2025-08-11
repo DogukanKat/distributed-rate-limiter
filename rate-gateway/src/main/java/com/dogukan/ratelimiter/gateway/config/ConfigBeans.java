@@ -12,4 +12,9 @@ public class ConfigBeans {
   public ConfigProvider configProvider() {
     return new InMemoryProvider();
   }
+
+  @Bean
+  public InMemoryProvider inMemoryProvider() {
+    return new InMemoryProvider();
+  }
 }

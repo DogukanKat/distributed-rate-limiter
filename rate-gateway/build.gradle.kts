@@ -14,6 +14,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
   implementation("org.springframework.kafka:spring-kafka")
   implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+  implementation("io.micrometer:micrometer-registry-prometheus")
+  implementation("com.fasterxml.jackson.core:jackson-databind")
+  implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
   // Observability (ileride kullanacağız)
   implementation("io.micrometer:micrometer-registry-prometheus")
