@@ -106,4 +106,8 @@ public class RedisConfigProvider implements ConfigProvider {
       return null;
     }
   }
+
+  public void invalidateTenant(String tenant) {
+    tenantRulesCache.invalidate(tenant);
+  }
 }
