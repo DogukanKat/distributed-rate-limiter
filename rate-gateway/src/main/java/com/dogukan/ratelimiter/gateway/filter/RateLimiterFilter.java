@@ -90,6 +90,7 @@ public class RateLimiterFilter implements WebFilter {
           allowCounter.increment();
           exchange.getResponse().getHeaders()
             .add("X-RateLimit-Remaining", String.valueOf(d.remaining()));
+          exchange.getResponse().getHeaders().add("RateLimit-Limit", String.valueOf(fCapacity));
 
           if (fCapacity > 0 && (double) d.remaining() / (double) fCapacity <= nearLimitRatio) {
             audit.publish(AuditEvent.nearLimit(
@@ -110,7 +111,9 @@ public class RateLimiterFilter implements WebFilter {
           var res = exchange.getResponse();
           res.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
           res.getHeaders().add("Retry-After", String.valueOf(d.retryAfterSeconds()));
-
+          res.getHeaders().add("RateLimit-Remaining", String.valueOf(d.remaining()));
+          res.getHeaders().add("RateLimit-Limit", String.valueOf(fCapacity));
+          res.getHeaders().add("RateLimit-Reset", String.valueOf(d.retryAfterSeconds()));
           // Deny audit (fire-and-forget)
           audit.publish(AuditEvent.deny(
             fTenant, fPath, fMethod, fIdentity,
